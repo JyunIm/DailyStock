@@ -99,9 +99,10 @@
         rows.forEach(row => {
           const cells = row.c;
           const date = cells[0]?.v;
+          const name = cells[2]?.v;
           const code = cells[1]?.v;
-          const volume = cells[2]?.v || "N/A";
-          const link = cells[3]?.v || "#";
+          const volume = cells[3]?.v || "N/A";
+          const link = cells[4]?.v || "#";
 
           if (!stockDataByDate[date]) stockDataByDate[date] = [];
           stockDataByDate[date].push({ code, volume, link });
@@ -141,7 +142,7 @@
       items.forEach((item, index) => {
         const li = document.createElement("li");
         li.innerHTML = `
-          <div class="code">${index + 1}. ${item.code}</div>
+          <div class="code">${index + 1}. ${item.name} ( ${item.code} )</div>
           <div class="volume">거래량: ${item.volume}</div>
           <a class="link" href="${item.link}" target="_blank">차트 보기</a>
         `;
