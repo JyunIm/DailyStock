@@ -15,7 +15,25 @@
     h1 {
       text-align: center;
       color: #1f2937;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      padding: 0.5rem 1rem;
+      background-color: #e5e7eb;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tab.active {
+      background-color: #2563eb;
+      color: white;
     }
     ul {
       list-style: none;
@@ -29,10 +47,6 @@
       margin-bottom: 1rem;
       border-radius: 0.75rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
     }
     .code {
       font-weight: bold;
@@ -53,6 +67,10 @@
       font-size: 0.9rem;
     }
     @media (max-width: 480px) {
+      .tabs {
+        flex-direction: column;
+        align-items: center;
+      }
       li {
         flex-direction: column;
         align-items: flex-start;
@@ -62,42 +80,74 @@
 </head>
 <body>
   <h1>📊 오늘의 거래량 상위 종목</h1>
-  <ul id="stock-list">불러오는 중...</ul>
+  <div class="tabs" id="tabs">불러오는 중...</div>
+  <ul id="stock-list"></ul>
 
   <script>
-    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40"; // ← 본인의 시트 ID로 교체하세요
-    const gid = "1489164103"; // 시트 탭 GID
+    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40"; // ← 여기에 본인 시트 ID 입력!
+    const gid = "1489164103";
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
 
+    let stockDataByDate = {};
+
     fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const json = JSON.parse(data.substr(47).slice(0, -2));
+      .then(res => res.text())
+      .then(rep => {
+        const json = JSON.parse(rep.substr(47).slice(0, -2));
         const rows = json.table.rows;
 
-        const ul = document.getElementById("stock-list");
-        ul.innerHTML = "";
-
-        rows.forEach((row, index) => {
+        rows.forEach(row => {
           const cells = row.c;
-          const date = cells[0]?.v || "-";
-          const code = cells[1]?.v || "-";
+          const date = cells[0]?.v;
+          const code = cells[1]?.v;
           const volume = cells[2]?.v || "N/A";
           const link = cells[3]?.v || "#";
 
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <div><span class="code">${index + 1}. ${code}</span></div>
-            <div class="volume">날짜: ${date} · 거래량: ${volume}</div>
-            <a class="link" href="${link}" target="_blank">네이버 차트 보기</a>
-          `;
-          ul.appendChild(li);
+          if (!stockDataByDate[date]) stockDataByDate[date] = [];
+          stockDataByDate[date].push({ code, volume, link });
         });
-      })
-      .catch(error => {
-        document.getElementById("stock-list").innerText = "데이터를 불러오지 못했습니다 😥";
-        console.error("Error:", error);
+
+        renderTabs();
       });
+
+    function renderTabs() {
+      const tabsContainer = document.getElementById("tabs");
+      tabsContainer.innerHTML = "";
+
+      const sortedDates = Object.keys(stockDataByDate).sort().reverse(); // 최신 날짜 먼저
+
+      sortedDates.forEach((date, index) => {
+        const tab = document.createElement("div");
+        tab.className = "tab";
+        tab.textContent = date;
+        tab.onclick = () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          renderList(stockDataByDate[date]);
+        };
+        tabsContainer.appendChild(tab);
+      });
+
+      // 가장 최근 날짜 자동 선택
+      if (sortedDates.length > 0) {
+        tabsContainer.children[0].click();
+      }
+    }
+
+    function renderList(items) {
+      const ul = document.getElementById("stock-list");
+      ul.innerHTML = "";
+
+      items.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="code">${index + 1}. ${item.code}</div>
+          <div class="volume">거래량: ${item.volume}</div>
+          <a class="link" href="${item.link}" target="_blank">차트 보기</a>
+        `;
+        ul.appendChild(li);
+      });
+    }
   </script>
 </body>
 </html>
