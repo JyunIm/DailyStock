@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📈 오늘의 거래량 상위 종목</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 1.5rem;
+      color: #111827;
+    }
+    h1 {
+      text-align: center;
+      color: #1f2937;
+      margin-bottom: 2rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    li {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .code {
+      font-weight: bold;
+      color: #1d4ed8;
+    }
+    .volume {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    .link {
+      margin-top: 0.5rem;
+      display: inline-block;
+      background-color: #2563eb;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 480px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 오늘의 거래량 상위 종목</h1>
+  <ul id="stock-list">불러오는 중...</ul>
+
+  <script>
+    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40"; // ← 본인의 시트 ID로 교체하세요
+    const gid = "1489164103"; // 시트 탭 GID
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        const json = JSON.parse(data.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const ul = document.getElementById("stock-list");
+        ul.innerHTML = "";
+
+        rows.forEach((row, index) => {
+          const cells = row.c;
+          const date = cells[0]?.v || "-";
+          const code = cells[1]?.v || "-";
+          const volume = cells[2]?.v || "N/A";
+          const link = cells[3]?.v || "#";
+
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div><span class="code">${index + 1}. ${code}</span></div>
+            <div class="volume">날짜: ${date} · 거래량: ${volume}</div>
+            <a class="link" href="${link}" target="_blank">네이버 차트 보기</a>
+          `;
+          ul.appendChild(li);
+        });
+      })
+      .catch(error => {
+        document.getElementById("stock-list").innerText = "데이터를 불러오지 못했습니다 😥";
+        console.error("Error:", error);
+      });
+  </script>
+</body>
+</html>
