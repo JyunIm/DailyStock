@@ -99,13 +99,13 @@
         rows.forEach(row => {
           const cells = row.c;
           const date = cells[0]?.v;
+          const code = cells[1]?.v.toString().padStart(6, "0");
           const name = cells[2]?.v;
-          const code = cells[1]?.v;
           const volume = cells[3]?.v || "N/A";
           const link = cells[4]?.v || "#";
 
           if (!stockDataByDate[date]) stockDataByDate[date] = [];
-          stockDataByDate[date].push({ code, volume, link });
+          stockDataByDate[date].push({ date, code, name, volume, link });
         });
 
         renderTabs();
