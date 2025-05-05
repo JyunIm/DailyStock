@@ -2,153 +2,182 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📈 오늘의 거래량 상위 종목</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 오늘의 종목</title>
   <style>
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f9fafb;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 1.5rem;
-      color: #111827;
-    }
-    h1 {
-      text-align: center;
-      color: #1f2937;
-      margin-bottom: 1rem;
-    }
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .tab {
-      padding: 0.5rem 1rem;
-      background-color: #e5e7eb;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .tab.active {
-      background-color: #2563eb;
-      color: white;
-    }
-    ul {
-      list-style: none;
       padding: 0;
-      max-width: 600px;
-      margin: 0 auto;
+      background: #f9f9f9;
+      color: #333;
     }
-    li {
-      background: white;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .code {
-      font-weight: bold;
-      color: #1d4ed8;
-    }
-    .volume {
-      font-size: 0.9rem;
-      color: #6b7280;
-    }
-    .link {
-      margin-top: 0.5rem;
-      display: inline-block;
-      background-color: #2563eb;
+
+    header {
+      background: #007bff;
       color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    #tabs {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      gap: 0.5rem;
       padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      text-decoration: none;
+      border-bottom: 1px solid #ccc;
+      background: #fff;
+    }
+
+    #tabs::-webkit-scrollbar {
+      height: 6px;
+    }
+    #tabs::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+
+    .tab-button {
+      padding: 0.4rem 1rem;
+      border: none;
+      background: #e0e0e0;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
       font-size: 0.9rem;
     }
-    @media (max-width: 480px) {
-      .tabs {
-        flex-direction: column;
-        align-items: center;
-      }
-      li {
-        flex-direction: column;
-        align-items: flex-start;
+
+    .tab-button.active {
+      background: #007bff;
+      color: white;
+    }
+
+    #content {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .stock-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .stock-card img {
+      width: 100%;
+      max-width: 220px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stock-name {
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+    }
+
+    .stock-volume {
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    @media (max-width: 500px) {
+      header {
+        font-size: 1.2rem;
       }
     }
   </style>
 </head>
 <body>
-  <h1>📊 오늘의 거래량 상위 종목</h1>
-  <div class="tabs" id="tabs">불러오는 중...</div>
-  <ul id="stock-list"></ul>
 
-  <script>
-    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40"; // ← 여기에 본인 시트 ID 입력!
-    const gid = "1489164103";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+<header>📈 오늘의 거래량 상위 종목</header>
+<div id="tabs"></div>
+<div id="content"></div>
 
-    let stockDataByDate = {};
+<script>
+const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+const gid = "1489164103";
+const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+const stockDataByDate = {};
 
-    fetch(url)
-      .then(res => res.text())
-      .then(rep => {
-        const json = JSON.parse(rep.substr(47).slice(0, -2));
-        const rows = json.table.rows;
+fetch(url)
+  .then(res => res.text())
+  .then(rep => {
+    const json = JSON.parse(rep.substring(47).slice(0, -2));
+    const rows = json.table.rows;
 
-        rows.forEach(row => {
-          const cells = row.c;
-          const date = cells[0]?.v;
-          const code = cells[1]?.v.toString().padStart(6, "0");
-          const name = cells[2]?.v;
-          const volume = cells[3]?.v || "N/A";
-          const link = cells[4]?.v || "#";
+    rows.forEach(row => {
+      const cells = row.c;
+      if (!cells || cells.length < 5) return;
 
-          if (!stockDataByDate[date]) stockDataByDate[date] = [];
-          stockDataByDate[date].push({ date, code, name, volume, link });
-        });
+      const date = cells[0]?.v;
+      const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
+      const name = cells[2]?.v || "종목명 없음";
+      const volume = cells[3]?.v || "N/A";
+      const link = cells[4]?.v || "#";
 
-        renderTabs();
-      });
+      if (!date) return;
 
-    function renderTabs() {
-      const tabsContainer = document.getElementById("tabs");
-      tabsContainer.innerHTML = "";
+      if (!stockDataByDate[date]) stockDataByDate[date] = [];
+      stockDataByDate[date].push({ date, code, name, volume, link });
+    });
 
-      const sortedDates = Object.keys(stockDataByDate).sort().reverse(); // 최신 날짜 먼저
+    renderTabs();
+  });
 
-      sortedDates.forEach((date, index) => {
-        const tab = document.createElement("div");
-        tab.className = "tab";
-        tab.textContent = date;
-        tab.onclick = () => {
-          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          renderList(stockDataByDate[date]);
-        };
-        tabsContainer.appendChild(tab);
-      });
+function renderTabs() {
+  const tabContainer = document.getElementById("tabs");
+  const sortedDates = Object.keys(stockDataByDate).sort().reverse(); // 최신 날짜 우선
+  tabContainer.innerHTML = "";
 
-      // 가장 최근 날짜 자동 선택
-      if (sortedDates.length > 0) {
-        tabsContainer.children[0].click();
-      }
-    }
+  sortedDates.forEach((date, idx) => {
+    const tab = document.createElement("button");
+    tab.className = "tab-button";
+    tab.textContent = date;
+    if (idx === 0) tab.classList.add("active");
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+      tab.classList.add("active");
+      renderStocks(date);
+    });
+    tabContainer.appendChild(tab);
+  });
 
-    function renderList(items) {
-      const ul = document.getElementById("stock-list");
-      ul.innerHTML = "";
+  // 최신 날짜 자동 표시
+  if (sortedDates.length > 0) renderStocks(sortedDates[0]);
+}
 
-      items.forEach((item, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <div class="code">${index + 1}. ${item.name} ( ${item.code} )</div>
-          <div class="volume">거래량: ${item.volume}</div>
-          <a class="link" href="${item.link}" target="_blank">차트 보기</a>
-        `;
-        ul.appendChild(li);
-      });
-    }
-  </script>
+function renderStocks(date) {
+  const content = document.getElementById("content");
+  const stocks = stockDataByDate[date];
+  content.innerHTML = "";
+
+  stocks.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "stock-card";
+    card.innerHTML = `
+      <a href="${item.link}" target="_blank">
+        <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/${item.code}.png" alt="${item.name} 차트">
+      </a>
+      <div class="stock-name">${item.name} (${item.code})</div>
+      <div class="stock-volume">📊 거래량: ${item.volume.toLocaleString()}</div>
+    `;
+    content.appendChild(card);
+  });
+}
+</script>
+
 </body>
 </html>
