@@ -5,32 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📈 오늘의 종목</title>
   <link rel="stylesheet" href="/DailyStock/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <nav class="sidebar" id="sidebar">
-      <div class="logo">🗂️</div>
-      <ul class="menu"}
-        <li><a href="stock_list.html">📈 거래량 상위 종목</a></li>
-        <li><a href="interest.html">📌 관심 종목</a></li>
-        <li><a href="transaction.html">💰 거래대금 상위 종목</a></li>
-      </ul>
-    </nav>
-    <div class="content">
-      <header>
-        <button class="toggle-btn" id="toggleBtn">☰</button>
-        <h1>Welcome to My Dashboard</h1>
-        <p>사이드바 토글 및 모바일 최적화가 적용된 예시입니다.</p>
-      </header>
+<body class="h-screen w-full bg-white dark:bg-[#1E2028]">
+  <!-- Sidebar Container -->
+  <div class="fixed left-0 top-0 h-full w-64 bg-gray-50 dark:bg-[#252731] border-r border-gray-200 dark:border-gray-700" id="sidebar">
+    <!-- Logo Section -->
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center space-x-3">
+        <img src="https://cdn.startupful.io/img/app_logo/no_img.png" alt="Logo" class="w-8 h-8 rounded-lg">
+        <span class="text-lg font-semibold text-black dark:text-white">Dashboard</span>
+      </div>
     </div>
+
+    <!-- Navigation Menu -->
+    <nav class="p-4 space-y-2">
+      <a href="stock_list.html" class="flex items-center space-x-3 p-2 rounded-lg text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span>거래량 상위 종목</span>
+      </a>
+      <a href="interest.html" class="flex items-center space-x-3 p-2 rounded-lg text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>관심 종목</span>
+      </a>
+      <a href="transaction.html" class="flex items-center space-x-3 p-2 rounded-lg text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2m0-6c-2.21 0-4 1.79-4 4s1.79 4 4 4m0 0c2.21 0 4-1.79 4-4s-1.79-4-4-4m0 6v4"></path>
+        </svg>
+        <span>거래대금 상위 종목</span>
+      </a>
+    </nav>
+
+    <!-- User Profile Section -->
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center space-x-3">
+        <img src="https://cdn.startupful.io/img/main_page/profile1.png" alt="Profile" class="w-10 h-10 rounded-full">
+        <div>
+          <div class="text-sm font-medium text-black dark:text-white">John Doe</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">john@example.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="ml-64 p-4 transition-all duration-300" id="mainContent">
+    <header>
+      <button class="toggle-btn text-xl mb-4" id="toggleBtn">🏠</button>
+      <h1>Welcome to My Dashboard</h1>
+      <p>사이드바 토글 및 모바일 최적화가 적용된 예시입니다.</p>
+    </header>
   </div>
 
   <script>
     const toggleBtn = document.getElementById("toggleBtn");
     const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
 
     toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("-left-64"); // Tailwind 방식으로 사이드바 숨김/보임
       sidebar.classList.toggle("collapsed");
+      if (sidebar.classList.contains("collapsed")) {
+        mainContent.classList.remove("ml-64");
+      } else {
+        mainContent.classList.add("ml-64");
+      }
     });
   </script>
 </body>
