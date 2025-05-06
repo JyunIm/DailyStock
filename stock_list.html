@@ -8,6 +8,12 @@
   </head>
   <body class="bg-white">
 
+    <!-- 탭 버튼 영역 -->
+    <div id="tabs" class="flex gap-2 p-4 mt-16"></div>
+    
+    <!-- 종목 카드 리스트 영역 -->
+    <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
+    
     <!-- Sidebar -->
     <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
       <div class="p-4 flex justify-between items-center border-b">
@@ -120,7 +126,7 @@
   
         stocks.forEach(stock => {
           const card = document.createElement("div");
-          card.className = "stock-card";
+          card.className = "p-4 bg-white rounded shadow border";
           
           let formattedNews = (stock.news || "")
             .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
