@@ -4,14 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>📈 오늘의 종목</title>
-    <link rel="stylesheet" href="/DailyStock/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
+  <body class="bg-white">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
+      <div class="p-4 flex justify-between items-center border-b">
+        <span class="font-semibold text-lg">메뉴</span>
+        <button id="closeSidebar" class="text-2xl">&times;</button>
+      </div>
+      <nav class="p-4 space-y-2">
+        <a href="stock_list.html" class="block p-2 rounded hover:bg-gray-200">거래량 상위 종목</a>
+        <a href="interest.html" class="block p-2 rounded hover:bg-gray-200">관심 종목</a>
+        <a href="transaction.html" class="block p-2 rounded hover:bg-gray-200">거래대금 상위 종목</a>
+      </nav>
+    </div>
+
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b shadow z-40 h-14 flex items-center px-4">
+      <button id="toggleBtn" class="text-2xl z-50">≣</button>
+      <h1 class="text-xl font-bold text-center absolute left-1/2 transform -translate-x-1/2">📈 거래량 상위 종목</h1>
+    </header>
   
-    <header>📈 거래량 상위 종목</header>
-    <div class="tabs" id="tabs"></div>
-    <div class="stock-list" id="stockList"></div>
+    <script>
+      const toggleBtn = document.getElementById("toggleBtn");
+      const closeBtn = document.getElementById("closeSidebar");
+      const sidebar = document.getElementById("sidebar");
   
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("-translate-x-full");
+      });
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+      });
+  
+      async function fetchAndPopulate(url, elementId) {
+        try {
+          const res = await fetch(url);
+          const text = await res.text();
+          const rows = text.trim().split('\n').slice(1); // skip header
+          const list = document.getElementById(elementId);
+          list.innerHTML = "";
+  
+          rows.slice(0, 3).forEach(row => {
+            const cols = row.split(",");
+            const li = document.createElement("li");
+            li.textContent = cols[0]; // 첫 번째 열
+            list.appendChild(li);
+          });
+        } catch (err) {
+          console.error("데이터 로드 실패:", err);
+        }
+      }
+    </script>
+      
     <script>
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "1489164103";
