@@ -26,7 +26,7 @@
 
         rows.forEach(row => {
           const cells = row.c;
-          if (!cells || cells.length < 5) return;
+          if (!cells || cells.length < 4) return;
 
           const date = cells[0]?.v;
           const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
