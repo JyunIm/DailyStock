@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 메인 대시보드</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html">📈 거래량 종목</a>
+    <a href="watchlist.html">📌 관심종목</a>
+  </div>
+
+  <header>📊 주요 종목 요약</header>
+
+  <div class="card-container">
+    <div class="card" id="volumeSummary">
+      <h3>📈 거래량 상위 종목 (요약)</h3>
+      <div id="volumeCards">로딩 중...</div>
+      <a href="index.html" class="more-link">➕ 더보기</a>
+    </div>
+
+    <div class="card" id="watchlistSummary">
+      <h3>📌 관심종목 (요약)</h3>
+      <div id="watchlistCards">로딩 중...</div>
+      <a href="watchlist.html" class="more-link">➕ 더보기</a>
+    </div>
+  </div>
+
+  <script>
+    const volumeSheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+    const volumeGid = "1489164103";
+    const volumeUrl = `https://docs.google.com/spreadsheets/d/${volumeSheetId}/gviz/tq?tqx=out:json&gid=${volumeGid}`;
+
+    fetch(volumeUrl)
+      .then(res => res.text())
+      .then(rep => {
+        const json = JSON.parse(rep.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+        const stockCards = [];
+
+        for (let i = 0; i < Math.min(3, rows.length); i++) {
+          const row = rows[i].c;
+          const code = row[1]?.v?.toString().padStart(6, "0");
+          const name = row[2]?.v;
+          const volume = row[3]?.v;
+          const link = row[4]?.v;
+          stockCards.push(`
+            <div>
+              <strong>${name} (${code})</strong><br>
+              📊 거래량: ${Number(volume).toLocaleString()}<br>
+              <a href="${link}" target="_blank">📈 차트 보기</a>
+            </div>
+          `);
+        }
+
+        document.getElementById("volumeCards").innerHTML = stockCards.join("<hr>");
+      });
+
+    const watchSheetId = "YOUR_SHEET_ID_HERE";
+    const watchGid = "YOUR_GID_HERE";
+    const watchUrl = `https://docs.google.com/spreadsheets/d/${watchSheetId}/gviz/tq?tqx=out:json&gid=${watchGid}`;
+
+    fetch(watchUrl)
+      .then(res => res.text())
+      .then(rep => {
+        const json = JSON.parse(rep.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+        const watchCards = [];
+
+        for (let i = 0; i < Math.min(3, rows.length); i++) {
+          const row = rows[i].c;
+          const code = row[0]?.v?.toString().padStart(6, "0");
+          const name = row[1]?.v;
+          const memo = row[2]?.v || "";
+          watchCards.push(`
+            <div>
+              <strong>${name} (${code})</strong><br>
+              ${memo}<br>
+              <a href="https://finance.naver.com/item/main.naver?code=${code}" target="_blank">네이버 금융</a>
+            </div>
+          `);
+        }
+
+        document.getElementById("watchlistCards").innerHTML = watchCards.join("<hr>");
+      });
+  </script>
+</body>
+</html>
