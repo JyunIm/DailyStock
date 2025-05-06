@@ -15,7 +15,7 @@
     <script>
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "1489164103";
-      const url = https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid};
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
       const stockDataByDate = {};
   
       fetch(url)
@@ -80,15 +80,16 @@
             .replace(/\n/g, "<br>"); // 줄바꿈
       
           const newsHtml = stock.news
-            ? <div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>
+            ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>`
             : "";
-          
-          card.innerHTML = 
+
+          card.innerHTML = `
             <h3>${stock.name} (${stock.code})</h3>
             <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
             <a href="${stock.link}" target="_blank">📈 차트 보기</a>
             ${newsHtml}
-          ;
+          `;
+
   
           list.appendChild(card);
   
