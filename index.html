@@ -7,94 +7,31 @@
   <link rel="stylesheet" href="/DailyStock/style.css" />
 </head>
 <body>
-
-  <header>📈 거래량 상위 종목</header>
-  <div class="tabs" id="tabs"></div>
-  <div class="stock-list" id="stockList"></div>
+  <div class="container">
+    <nav class="sidebar" id="sidebar">
+      <div class="logo">🗂️</div>
+      <ul class="menu"}
+        <li><a href="stock_list.html">📈 거래량 상위 종목</a></li>
+        <li><a href="interest.html">📌 관심 종목</a></li>
+        <li><a href="transaction.html">💰 거래대금 상위 종목</a></li>
+      </ul>
+    </nav>
+    <div class="content">
+      <header>
+        <button class="toggle-btn" id="toggleBtn">☰</button>
+        <h1>Welcome to My Dashboard</h1>
+        <p>사이드바 토글 및 모바일 최적화가 적용된 예시입니다.</p>
+      </header>
+    </div>
+  </div>
 
   <script>
-    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
-    const gid = "1489164103";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-    const stockDataByDate = {};
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
 
-    fetch(url)
-      .then(res => res.text())
-      .then(rep => {
-        const json = JSON.parse(rep.substring(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        rows.forEach(row => {
-          const cells = row.c;
-          if (!cells || cells.length < 5) return;
-
-          const date = cells[0]?.v;
-          const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
-          const name = cells[2]?.v || "종목명 없음";
-          const volume = cells[3]?.v || "N/A";
-          const link = cells[4]?.v || "#";
-          const news = cells[5]?.v || "";
-
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
-
-          if (!stockDataByDate[date]) stockDataByDate[date] = [];
-          stockDataByDate[date].push({ code, name, volume, link, news });
-        });
-
-        renderTabs();
-      });
-
-    function renderTabs() {
-      const tabs = document.getElementById("tabs");
-      tabs.innerHTML = "";
-
-      const dates = Object.keys(stockDataByDate).sort().reverse();
-
-      dates.forEach((date, index) => {
-        const tab = document.createElement("button");
-        tab.textContent = date;
-        tab.className = "tab" + (index === 0 ? " active" : "");
-        tab.onclick = () => {
-          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          renderStockList(date);
-        };
-        tabs.appendChild(tab);
-      });
-
-      if (dates.length > 0) renderStockList(dates[0]);
-    }
-
-    function renderStockList(date) {
-      const list = document.getElementById("stockList");
-      list.innerHTML = "";
-
-      const stocks = stockDataByDate[date] || [];
-
-      stocks.forEach(stock => {
-        const card = document.createElement("div");
-        card.className = "stock-card";
-        
-        let formattedNews = (stock.news || "")
-          .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
-          .replace(/\n/g, "<br>"); // 줄바꿈
-    
-        const newsHtml = stock.news
-          ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>`
-          : "";
-        
-        card.innerHTML = `
-          <h3>${stock.name} (${stock.code})</h3>
-          <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
-          <a href="${stock.link}" target="_blank">📈 차트 보기</a>
-          ${newsHtml}
-        `;
-
-        list.appendChild(card);
-
-      });
-    }
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+    });
   </script>
-
 </body>
 </html>
