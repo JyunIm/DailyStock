@@ -33,8 +33,6 @@
             const change = cells[2]?.v;
             const amount = cells[3]?.v || "N/A";
             const sector = cells[4]?.v || "-";
-  
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
       
             if (!stockDataByDate[date]) stockDataByDate[date] = [];
             stockDataByDate[date].push({ code, name, change, amount, sector });
