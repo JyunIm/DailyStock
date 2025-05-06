@@ -114,7 +114,7 @@
           card.className = "p-4 bg-white rounded shadow border";
           
           let formattedNews = (stock.news || "")
-            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600">$1</a>') // URL 자동 링크
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 break-all">$1</a>')
             .replace(/\n/g, "<br>"); // 줄바꿈
       
           const newsHtml = stock.news
@@ -124,7 +124,7 @@
           card.innerHTML = `
             <h3><strong>${stock.name} (${stock.code})</strong></h3>
             <p class="text-gray-700">📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
-            <a href="${stock.link}" target="_blank" class="text-blue-600">📈 차트 보기</a>
+            <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📈 차트 보기</a>
             ${newsHtml}
           `;
 
