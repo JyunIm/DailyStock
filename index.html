@@ -9,7 +9,7 @@
 </head>
 <body class="min-h-screen w-full bg-white">
   <!-- Sidebar Container -->
-  <div class="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r border-gray-200 z-50 transition-all duration-300" id="sidebar">
+  <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r z-50 transition-transform -translate-x-full">
     <!-- Logo Section -->
     <div class="p-4 border-b border-gray-200 flex justify-between items-center">
       <span class="text-lg font-semibold text-black">메뉴</span>
@@ -48,49 +48,29 @@
   </div>
 
   <!-- Content -->
-  <div class="ml-64 p-4 transition-all duration-300" id="mainContent">
+  <div id="mainContent" class="p-4 transition-all duration-300 relative z-10">
     <header>
-      <button class="toggle-btn text-xl mb-4 fixed top-4 left-4 z-40 md:hidden bg-white p-2 rounded shadow" id="toggleBtn">≣</button>
+      <button id="toggleBtn" class="toggle-btn text-xl mb-4 fixed top-4 left-4 z-40 bg-white p-2 rounded shadow">≣</button>
       <h1 class="text-2xl font-bold mb-6">Welcome to My Dashboard</h1>
-      <!-- Example Cards Section -->
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Card 1 -->
-        <div class="bg-white p-4 rounded shadow">
+  
+      <!-- Card -->
+      <div class="grid md:grid-cols-3 gap-6 relative">
+        <div class="bg-white p-4 rounded shadow relative">
           <h2 class="text-lg font-semibold mb-2">거래량 상위</h2>
-          <ul class="text-sm text-gray-700 space-y-1">
-            <li>가나다</li>
-            <li>파란나</li>
-            <li>최고점</li>
-          </ul>
-          <div class="flex justify-between items-center mt-4">
-            <a href="stock_list.html" class="text-blue-500 hover:underline">[더보기]</a>
-          </div>
+          <ul id="volume-list" class="text-sm text-gray-700 space-y-1"></ul>
+          <a href="stock_list.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
         </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white p-4 rounded shadow">
+  
+        <div class="bg-white p-4 rounded shadow relative">
           <h2 class="text-lg font-semibold mb-2">관심 종목</h2>
-          <ul class="text-sm text-gray-700 space-y-1">
-            <li>배려도</li>
-            <li>지원상</li>
-            <li>단가로</li>
-          </ul>
-          <div class="flex justify-between items-center mt-4">
-            <a href="interest.html" class="text-blue-500 hover:underline">[더보기]</a>
-          </div>
+          <ul id="interest-list" class="text-sm text-gray-700 space-y-1"></ul>
+          <a href="interest.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
         </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white p-4 rounded shadow">
+  
+        <div class="bg-white p-4 rounded shadow relative">
           <h2 class="text-lg font-semibold mb-2">거래대금 상위</h2>
-          <ul class="text-sm text-gray-700 space-y-1">
-            <li>헤어로</li>
-            <li>월샵</li>
-            <li>크로티</li>
-          </ul>
-          <div class="flex justify-between items-center mt-4">
-            <a href="transaction.html" class="text-blue-500 hover:underline">[더보기]</a>
-          </div>
+          <ul id="transaction-list" class="text-sm text-gray-700 space-y-1"></ul>
+          <a href="transaction.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
         </div>
       </div>
     </header>
@@ -100,19 +80,36 @@
     const toggleBtn = document.getElementById("toggleBtn");
     const closeBtn = document.getElementById("closeSidebar");
     const sidebar = document.getElementById("sidebar");
-    const mainContent = document.getElementById("mainContent");
 
     toggleBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("-left-64");
-      sidebar.classList.toggle("collapsed");
-      mainContent.classList.toggle("ml-64");
+      sidebar.classList.toggle("-translate-x-full");
     });
-
     closeBtn.addEventListener("click", () => {
-      sidebar.classList.add("-left-64");
-      sidebar.classList.add("collapsed");
-      mainContent.classList.remove("ml-64");
+      sidebar.classList.add("-translate-x-full");
     });
+  
+    async function fetchAndPopulate(url, elementId) {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const rows = text.trim().split('\n').slice(1); // skip header
+        const list = document.getElementById(elementId);
+        list.innerHTML = "";
+
+        rows.slice(0, 3).forEach(row => {
+          const cols = row.split(",");
+          const li = document.createElement("li");
+          li.textContent = cols[0]; // 첫 번째 열
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("데이터 로드 실패:", err);
+      }
+    }
+  
+    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=1489164103", "volume-list");
+    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=2060091062", "interest-list");
+    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=82799785", "transaction-list");
   </script>
 </body>
 </html>
