@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📈 오늘의 종목</title>
+    <link rel="stylesheet" href="/DailyStock/style.css" />
+  </head>
+  <body>
+  
+    <header>💰 거래대금 상위</header>
+    <div class="tabs" id="tabs"></div>
+    <div class="stock-list" id="stockList"></div>
+   
+    <script>
+      const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+      const gid = "82799785";
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+      const stockDataByDate = {};
+  
+      fetch(url)
+        .then(res => res.text())
+        .then(rep => {
+          const json = JSON.parse(rep.substring(47).slice(0, -2));
+          const rows = json.table.rows;
+  
+          rows.forEach(row => {
+            const cells = row.c;
+            if (!cells || cells.length < 4) return;
+  
+            const code = cells[0]?.v?.toString().padStart(6, "0") || "000000";
+            const name = cells[1]?.v || "종목명 없음";
+            const change = cells[2]?.v;
+            const amount = cells[3]?.v || "N/A";
+            const sector = cells[4]?.v || "-";
+  
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      
+            if (!stockDataByDate[date]) stockDataByDate[date] = [];
+            stockDataByDate[date].push({ code, name, change, amount, sector });
+          });
+  
+          renderTabs();
+        });
+      
+      function renderTabs() {
+        const tabs = document.getElementById("tabs");
+        tabs.innerHTML = "";
+  
+        const dates = Object.keys(stockDataByDate).sort().reverse();
+  
+        dates.forEach((date, index) => {
+          const tab = document.createElement("button");
+          tab.textContent = date;
+          tab.className = "tab" + (index === 0 ? " active" : "");
+          tab.onclick = () => {
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            renderStockList(date);
+          };
+          tabs.appendChild(tab);
+        });
+  
+        if (dates.length > 0) renderStockList(dates[0]);
+      }
+  
+      function renderStockList(date) {
+        const list = document.getElementById("stockList");
+        list.innerHTML = "";
+  
+        const stocks = stockDataByDate[date] || [];
+  
+        stocks.forEach(stock => {
+          const card = document.createElement("div");
+          card.className = "stock-card";
+          
+          card.innerHTML = `
+            <h3>${stock.name} (${stock.code})</h3>
+            <p>📊 거래대금: ${Number(stock.amount).toLocaleString()}</p>
+            <p>📊 주가 변동: <strong>${stock.change}</strong></p>
+            <p>🗂️ 종목 섹터: <strong>${stock.sector}</strong></p>
+          `;
+  
+          list.appendChild(card);
+        });
+      }
+  
+    </script>
+  
+  </body>
+</html>
