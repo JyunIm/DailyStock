@@ -24,11 +24,7 @@
           const json = JSON.parse(rep.substring(47).slice(0, -2));
           const rows = json.table.rows;
 
-          const dateKey = "오늘";
-          
-          stockDataByDate[dateKey] = [];
-          
-          rows.forEach(row => {
+          rows.slice(1).forEach(row => {
             const cells = row.c;
             if (!cells || cells.length < 4) return;
   
@@ -36,9 +32,10 @@
             const name = cells[1]?.v || "종목명 없음";
             const change = cells[2]?.v;
             const amount = cells[3]?.v || "N/A";
-            const sector = cells[4]?.v || "-";
+            const sector = (cells[4]?.v && cells[4].v !== "nan") ? cells[4].v : "-";
 
-            stockDataByDate[dateKey].push({ code, name, change, amount, sector });
+            stockDataByDate["오늘"] = stockDataByDate["오늘"] || [];
+            stockDataByDate["오늘"].push({ code, name, change, amount, sector });
           });
   
           renderTabs();
