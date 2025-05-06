@@ -1,94 +1,133 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 오늘의 종목</title>
-  <link rel="stylesheet" href="/DailyStock/style.css" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📈 오늘의 종목</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-white">
 
-  <header>📌 관심종목</header>
-  <div class="tabs" id="tabs"></div>
-  <div class="stock-list" id="stockList"></div>
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
+      <div class="p-4 flex justify-between items-center border-b">
+        <span class="font-semibold text-lg">메뉴</span>
+        <button id="closeSidebar" class="text-2xl">&times;</button>
+      </div>
+      <nav class="p-4 space-y-2">
+        <a href="index.html" class="block p-2 rounded hover:bg-gray-200">오늘의 종목</a>
+        <a href="stock_list.html" class="block p-2 rounded hover:bg-gray-200">거래량 상위 종목</a>
+        <a href="interest.html" class="block p-2 rounded hover:bg-gray-200">관심 종목</a>
+        <a href="transaction.html" class="block p-2 rounded hover:bg-gray-200">거래대금 상위 종목</a>
+      </nav>
+    </div>
 
-  <script>
-    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
-    const gid = "2060091062";
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-    const stockDataByDate = {};
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b shadow z-40 h-14 flex items-center px-4">
+      <button id="toggleBtn" class="text-2xl z-50">≣</button>
+      <h1 class="text-xl font-bold text-center absolute left-1/2 transform -translate-x-1/2">📌 관심종목</h1>
+    </header>
 
-    fetch(url)
-      .then(res => res.text())
-      .then(rep => {
-        const json = JSON.parse(rep.substring(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        rows.forEach(row => {
-          const cells = row.c;
-          if (!cells || cells.length < 4) return;
-
-          const date = cells[0]?.v;
-          const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
-          const name = cells[2]?.v || "종목명 없음";
-          const link = cells[3]?.v || "#";
-          const grade = cells[4]?.v || "";
-
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    <!-- 탭 버튼 영역 -->
+    <div id="tabs" class="flex gap-2 px-4 mt-16 overflow-x-auto whitespace-nowrap"></div>
     
-          if (!stockDataByDate[date]) stockDataByDate[date] = [];
-          stockDataByDate[date].push({ code, name, link, grade });
+    <!-- 종목 카드 리스트 영역 -->
+    <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
+  
+    <script>
+      const toggleBtn = document.getElementById("toggleBtn");
+      const closeBtn = document.getElementById("closeSidebar");
+      const sidebar = document.getElementById("sidebar");
+  
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("-translate-x-full");
+      });
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+      });
+      
+      const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+      const gid = "2060091062";
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+      const stockDataByDate = {};
+  
+      fetch(url)
+        .then(res => res.text())
+        .then(rep => {
+          const json = JSON.parse(rep.substring(47).slice(0, -2));
+          const rows = json.table.rows;
+  
+          rows.forEach(row => {
+            const cells = row.c;
+            if (!cells || cells.length < 4) return;
+  
+            const date = cells[0]?.v;
+            const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
+            const name = cells[2]?.v || "종목명 없음";
+            const link = cells[3]?.v || "#";
+            const grade = cells[4]?.v || "";
+  
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      
+            if (!stockDataByDate[date]) stockDataByDate[date] = [];
+            stockDataByDate[date].push({ code, name, link, grade });
+          });
+  
+          renderTabs();
         });
-
-        renderTabs();
-      });
-    
-    function renderTabs() {
-      const tabs = document.getElementById("tabs");
-      tabs.innerHTML = "";
-
-      const dates = Object.keys(stockDataByDate).sort().reverse();
-
-      dates.forEach((date, index) => {
-        const tab = document.createElement("button");
-        tab.textContent = date;
-        tab.className = "tab" + (index === 0 ? " active" : "");
-        tab.onclick = () => {
-          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          renderStockList(date);
-        };
-        tabs.appendChild(tab);
-      });
-
-      if (dates.length > 0) renderStockList(dates[0]);
-    }
-
-    function renderStockList(date) {
-      const list = document.getElementById("stockList");
-      list.innerHTML = "";
-
-      const stocks = stockDataByDate[date] || [];
-
-      stocks.forEach(stock => {
-        const card = document.createElement("div");
-        card.className = "stock-card";
-
-        let formattedNews = (stock.news || "")
-          .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
-          .replace(/\n/g, "<br>"); // 줄바꿈
-        
-        card.innerHTML = `
-          <h3>${stock.name} (${stock.code})</h3>
-          <p>📈 종목 등급: <strong>${stock.grade}</strong></p>
-          <a href="${stock.link}" target="_blank">📊 차트 보기</a>
-        `;
-
-        list.appendChild(card);
-      });
-    }
-
-  </script>
-
-</body>
+      
+      function renderTabs() {
+        const tabs = document.getElementById("tabs");
+        tabs.innerHTML = "";
+  
+        const dates = Object.keys(stockDataByDate).sort().reverse();
+  
+        dates.forEach((date, index) => {
+          const tab = document.createElement("button");
+          tab.textContent = date;
+          tab.className = `tab px-4 py-2 rounded-full border transition-all ${
+            index === 0 ? "bg-black text-white" : "bg-white text-black"
+          }`;
+          tab.onclick = () => {
+            document.querySelectorAll(".tab").forEach(t => {
+              t.classList.remove("bg-black", "text-white");
+              t.classList.add("bg-white", "text-black");
+            });
+            tab.classList.remove("bg-white", "text-black");
+            tab.classList.add("bg-black", "text-white");
+            renderStockList(date);
+          };
+          tabs.appendChild(tab);
+        });
+  
+        if (dates.length > 0) renderStockList(dates[0]);
+      }
+  
+      function renderStockList(date) {
+        const list = document.getElementById("stockList");
+        list.innerHTML = "";
+  
+        const stocks = stockDataByDate[date] || [];
+  
+        stocks.forEach(stock => {
+          const card = document.createElement("div");
+          card.className = "p-4 bg-white rounded shadow border";
+  
+          let formattedNews = (stock.news || "")
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 break-all">$1</a>')
+            .replace(/\n/g, "<br>"); // 줄바꿈
+          
+          card.innerHTML = `
+            <h3><strong>${stock.name} (${stock.code})</strong></h3>
+            <p>📈 종목 등급: ${stock.grade}</p>
+            <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📊 차트 보기</a>
+          `;
+  
+          list.appendChild(card);
+        });
+      }
+  
+    </script>
+  
+  </body>
 </html>
