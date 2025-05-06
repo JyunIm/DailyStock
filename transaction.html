@@ -23,7 +23,11 @@
         .then(rep => {
           const json = JSON.parse(rep.substring(47).slice(0, -2));
           const rows = json.table.rows;
-  
+
+          const dateKey = "오늘";
+          
+          stockDataByDate[dateKey] = [];
+          
           rows.forEach(row => {
             const cells = row.c;
             if (!cells || cells.length < 4) return;
@@ -33,9 +37,8 @@
             const change = cells[2]?.v;
             const amount = cells[3]?.v || "N/A";
             const sector = cells[4]?.v || "-";
-      
-            if (!stockDataByDate[date]) stockDataByDate[date] = [];
-            stockDataByDate[date].push({ code, name, change, amount, sector });
+
+            stockDataByDate[dateKey].push({ code, name, change, amount, sector });
           });
   
           renderTabs();
