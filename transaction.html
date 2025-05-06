@@ -15,7 +15,6 @@
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "82799785";
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-      const stockDataByDate = {};
   
       fetch(url)
         .then(res => res.text())
