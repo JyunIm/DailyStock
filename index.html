@@ -1,115 +1,232 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 오늘의 종목</title>
-  <link rel="stylesheet" href="/DailyStock/style.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen w-full bg-white">
-  <!-- Sidebar Container -->
-  <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r z-50 transition-transform -translate-x-full">
-    <!-- Logo Section -->
-    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-      <span class="text-lg font-semibold text-black">메뉴</span>
-      <button id="closeSidebar" class="text-black text-xl">&times;</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📈 오늘의 종목</title>
+    <link rel="stylesheet" href="/DailyStock/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Noto Sans KR', sans-serif;
+        background-color: #f7f7f7;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+      .toggle-btn {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100%;
+        background-color: #333;
+        color: white;
+        padding: 2rem 1rem;
+        box-shadow: 2px 0 6px rgba(0,0,0,0.3);
+        transition: left 0.3s ease;
+        z-index: 999;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .content {
+        padding: 6rem 1rem 2rem;
+        transition: margin-left 0.3s ease;
+      }
+      .tabs {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .tab {
+        padding: 0.5rem 1rem;
+        margin: 0 0.25rem;
+        border: none;
+        background: #e0e0e0;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #333;
+        color: white;
+      }
+      .stock-list {
+        display: grid;
+        gap: 1rem;
+      }
+      .stock-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+      .more-btn {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <button class="toggle-btn" onclick="toggleSidebar()">≣</button>
+      <h1>오늘의 종목</h1>
     </div>
-
-    <!-- Navigation Menu -->
-    <nav class="p-4 space-y-2">
-      <a href="stock_list.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-        </svg>
-        <span>거래량 상위 종목</span>
-      </a>
-      <a href="interest.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <span>관심 종목</span>
-      </a>
-      <a href="transaction.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2m0-6c-2.21 0-4 1.79-4 4s1.79 4 4 4m0 0c2.21 0 4-1.79 4-4s-1.79-4-4-4m0 6v4"></path>
-        </svg>
-        <span>거래대금 상위 종목</span>
-      </a>
-    </nav>
-
-    <!-- User Profile Section -->
-    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-      <div>
-        <div class="text-sm font-medium text-black">JiHyun</div>
-        <div class="text-xs text-gray-500">honao@naver.com</div>
+    
+    <!-- Sidebar Container -->
+    <div id="sidebar" class="sidebar">
+      <!-- Logo Section -->
+      <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+        <span class="text-lg font-semibold text-black">메뉴</span>
+        <button id="closeSidebar" class="text-black text-xl">&times;</button>
+      </div>
+  
+      <!-- Navigation Menu -->
+      <nav class="p-4 space-y-2">
+        <a href="stock_list.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>거래량 상위 종목</span>
+        </a>
+        <a href="interest.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>관심 종목</span>
+        </a>
+        <a href="transaction.html" class="flex items-center space-x-3 p-2 rounded-lg text-black hover:bg-gray-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2m0-6c-2.21 0-4 1.79-4 4s1.79 4 4 4m0 0c2.21 0 4-1.79 4-4s-1.79-4-4-4m0 6v4"></path>
+          </svg>
+          <span>거래대금 상위 종목</span>
+        </a>
+      </nav>
+  
+      <!-- User Profile Section -->
+      <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div>
+          <div class="text-sm font-medium text-black">JiHyun</div>
+          <div class="text-xs text-gray-500">honao@naver.com</div>
+        </div>
       </div>
     </div>
-  </div>
+  
+    <div class="content">
+      <div class="tabs" id="tabs"></div>
+      <div class="stock-list" id="stockList"></div>
+    </div>
 
-  <!-- Content -->
-  <div id="mainContent" class="p-4 transition-all duration-300 relative z-10">
-    <header>
-      <button id="toggleBtn" class="toggle-btn text-xl mb-4 fixed top-4 left-4 z-40 bg-white p-2 rounded shadow">≣</button>
-      <h1 class="text-2xl font-bold mb-6">Welcome to My Dashboard</h1>
-  
-      <!-- Card -->
-      <div class="grid md:grid-cols-3 gap-6 relative">
-        <div class="bg-white p-4 rounded shadow relative">
-          <h2 class="text-lg font-semibold mb-2">거래량 상위</h2>
-          <ul id="volume-list" class="text-sm text-gray-700 space-y-1"></ul>
-          <a href="stock_list.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
-        </div>
-  
-        <div class="bg-white p-4 rounded shadow relative">
-          <h2 class="text-lg font-semibold mb-2">관심 종목</h2>
-          <ul id="interest-list" class="text-sm text-gray-700 space-y-1"></ul>
-          <a href="interest.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
-        </div>
-  
-        <div class="bg-white p-4 rounded shadow relative">
-          <h2 class="text-lg font-semibold mb-2">거래대금 상위</h2>
-          <ul id="transaction-list" class="text-sm text-gray-700 space-y-1"></ul>
-          <a href="transaction.html" class="absolute top-4 right-4 text-sm">더보기 &gt;</a>
-        </div>
-      </div>
-    </header>
-  </div>
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("active");
+      }
 
-  <script>
-    const toggleBtn = document.getElementById("toggleBtn");
-    const closeBtn = document.getElementById("closeSidebar");
-    const sidebar = document.getElementById("sidebar");
+      const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+      const gid = "1489164103";
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+      const stockDataByDate = {};
 
-    toggleBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("-translate-x-full");
-    });
-    closeBtn.addEventListener("click", () => {
-      sidebar.classList.add("-translate-x-full");
-    });
-  
-    async function fetchAndPopulate(url, elementId) {
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const rows = text.trim().split('\n').slice(1); // skip header
-        const list = document.getElementById(elementId);
+      fetch(url)
+        .then(res => res.text())
+        .then(rep => {
+          const json = JSON.parse(rep.substring(47).slice(0, -2));
+          const rows = json.table.rows;
+
+          rows.forEach(row => {
+            const cells = row.c;
+            if (!cells || cells.length < 5) return;
+
+            const date = cells[0]?.v;
+            const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
+            const name = cells[2]?.v || "종목명 없음";
+            const volume = cells[3]?.v || "N/A";
+            const link = cells[4]?.v || "#";
+            const news = cells[5]?.v || "";
+
+            if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)) return;
+
+            if (!stockDataByDate[date]) stockDataByDate[date] = [];
+            stockDataByDate[date].push({ code, name, volume, link, news });
+          });
+
+          renderTabs();
+        });
+
+      function renderTabs() {
+        const tabs = document.getElementById("tabs");
+        tabs.innerHTML = "";
+
+        const dates = Object.keys(stockDataByDate).sort().reverse();
+
+        dates.forEach((date, index) => {
+          const tab = document.createElement("button");
+          tab.textContent = date;
+          tab.className = "tab" + (index === 0 ? " active" : "");
+          tab.onclick = () => {
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            renderStockList(date);
+          };
+          tabs.appendChild(tab);
+        });
+
+        if (dates.length > 0) renderStockList(dates[0]);
+      }
+
+      function renderStockList(date) {
+        const list = document.getElementById("stockList");
         list.innerHTML = "";
 
-        rows.slice(0, 3).forEach(row => {
-          const cols = row.split(",");
-          const li = document.createElement("li");
-          li.textContent = cols[0]; // 첫 번째 열
-          list.appendChild(li);
+        const stocks = stockDataByDate[date] || [];
+
+        stocks.forEach(stock => {
+          const card = document.createElement("div");
+          card.className = "stock-card";
+
+          let formattedNews = (stock.news || "")
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+            .replace(/\n/g, "<br>");
+
+          const newsHtml = stock.news
+            ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>`
+            : "";
+
+          card.innerHTML = `
+            <h3>${stock.name} (${stock.code})</h3>
+            <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
+            <a href="${stock.link}" target="_blank">📈 차트 보기</a>
+            ${newsHtml}
+          `;
+
+          list.appendChild(card);
         });
-      } catch (err) {
-        console.error("데이터 로드 실패:", err);
       }
-    }
-  
-    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=1489164103", "volume-list");
-    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=2060091062", "interest-list");
-    fetchAndPopulate("https://docs.google.com/spreadsheets/d/1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40/gviz/tq?tqx=out:csv&gid=82799785", "transaction-list");
-  </script>
-</body>
+    </script>
+  </body>
 </html>
