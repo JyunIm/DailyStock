@@ -7,12 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white">
-
-    <!-- 탭 버튼 영역 -->
-    <div id="tabs" class="flex gap-2 p-4 mt-16"></div>
-    
-    <!-- 종목 카드 리스트 영역 -->
-    <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
     
     <!-- Sidebar -->
     <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
@@ -32,7 +26,13 @@
       <button id="toggleBtn" class="text-2xl z-50">≣</button>
       <h1 class="text-xl font-bold text-center absolute left-1/2 transform -translate-x-1/2">📈 거래량 상위 종목</h1>
     </header>
-  
+
+    <!-- 탭 버튼 영역 -->
+    <div id="tabs" class="flex gap-2 px-4 mt-16 overflow-x-auto whitespace-nowrap"></div>
+    
+    <!-- 종목 카드 리스트 영역 -->
+    <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
+    
     <script>
       const toggleBtn = document.getElementById("toggleBtn");
       const closeBtn = document.getElementById("closeSidebar");
@@ -44,28 +44,7 @@
       closeBtn.addEventListener("click", () => {
         sidebar.classList.add("-translate-x-full");
       });
-  
-      async function fetchAndPopulate(url, elementId) {
-        try {
-          const res = await fetch(url);
-          const text = await res.text();
-          const rows = text.trim().split('\n').slice(1); // skip header
-          const list = document.getElementById(elementId);
-          list.innerHTML = "";
-  
-          rows.slice(0, 3).forEach(row => {
-            const cols = row.split(",");
-            const li = document.createElement("li");
-            li.textContent = cols[0]; // 첫 번째 열
-            list.appendChild(li);
-          });
-        } catch (err) {
-          console.error("데이터 로드 실패:", err);
-        }
-      }
-    </script>
-      
-    <script>
+
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "1489164103";
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
@@ -106,10 +85,16 @@
         dates.forEach((date, index) => {
           const tab = document.createElement("button");
           tab.textContent = date;
-          tab.className = "tab" + (index === 0 ? " active" : "");
+          tab.className = `tab px-4 py-2 rounded-full border transition-all ${
+            index === 0 ? "bg-black text-white" : "bg-white text-black"
+          }`;
           tab.onclick = () => {
-            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
+            document.querySelectorAll(".tab").forEach(t => {
+              t.classList.remove("bg-black", "text-white");
+              t.classList.add("bg-white", "text-black");
+            });
+            tab.classList.remove("bg-white", "text-black");
+            tab.classList.add("bg-black", "text-white");
             renderStockList(date);
           };
           tabs.appendChild(tab);
@@ -129,17 +114,17 @@
           card.className = "p-4 bg-white rounded shadow border";
           
           let formattedNews = (stock.news || "")
-            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600">$1</a>') // URL 자동 링크
             .replace(/\n/g, "<br>"); // 줄바꿈
       
           const newsHtml = stock.news
-            ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>`
+            ? `<div class="mt-2 text-sm text-gray-700">📰 관련 뉴스:<br>${formattedNews}</div>`
             : "";
 
           card.innerHTML = `
-            <h3>${stock.name} (${stock.code})</h3>
-            <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
-            <a href="${stock.link}" target="_blank">📈 차트 보기</a>
+            <h3><strong>${stock.name} (${stock.code})</strong></h3>
+            <p class="text-gray-700">📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
+            <a href="${stock.link}" target="_blank" class="text-blue-600">📈 차트 보기</a>
             ${newsHtml}
           `;
 
