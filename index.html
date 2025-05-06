@@ -138,16 +138,26 @@
 
       if (dates.length > 0) renderStockList(dates[0]);
     }
-    
+        
     function renderStockList(date) {
       const list = document.getElementById("stockList");
       list.innerHTML = "";
     
       const stocks = stockDataByDate[date] || [];
     
-      stocks.forEach(stock => {
-        const card = document.createElement("div");
-        card.className = "stock-card";
+      const ul = document.createElement("ul");
+      ul.style.listStyle = "none";
+      ul.style.padding = "0";
+      ul.style.maxWidth = "600px";
+      ul.style.margin = "0 auto";
+    
+      stocks.forEach((stock, index) => {
+        const li = document.createElement("li");
+        li.style.background = "white";
+        li.style.padding = "1rem";
+        li.style.marginBottom = "1rem";
+        li.style.borderRadius = "0.75rem";
+        li.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
     
         const chartImg = `<img 
                             src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/mini_${stock.code}.png" 
@@ -155,20 +165,25 @@
                             style="width: 100%; max-width: 400px; margin-top: 0.5rem; border-radius: 8px;"
                           />`;
         const newsHtml = stock.news
-          ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}</div>`
+          ? `<div class="news" style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #ccc; font-size: 0.95rem; color: #333;">
+               <strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}
+             </div>`
           : "";
     
-        card.innerHTML = `
-          <h3>${stock.name} (${stock.code})</h3>
-          <p>📊 거래량: ${stock.volume.toLocaleString()}</p>
-          <a href="${stock.link}" target="_blank">📈 차트 바로가기</a>
+        li.innerHTML = `
+          <div class="code" style="font-weight: bold; color: #1d4ed8;">${index + 1}. ${stock.name} (${stock.code})</div>
+          <div class="volume" style="font-size: 0.9rem; color: #6b7280;">📊 거래량: ${stock.volume.toLocaleString()}</div>
+          <a class="link" href="${stock.link}" target="_blank" style="margin-top: 0.5rem; display: inline-block; background-color: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.9rem;">📈 차트 보기</a>
           ${chartImg}
           ${newsHtml}
         `;
     
-        list.appendChild(card);
+        ul.appendChild(li);
       });
+    
+      list.appendChild(ul);
     }
+
   </script>
 </body>
 </html>
