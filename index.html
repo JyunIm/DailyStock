@@ -7,14 +7,13 @@
   <link rel="stylesheet" href="/DailyStock/style.css" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="h-screen w-full bg-white dark:bg-[#1E2028]">
+<body class="min-h-screen w-full bg-white dark:bg-[#1E2028]">
   <!-- Sidebar Container -->
-  <div class="fixed left-0 top-0 h-full w-64 bg-gray-50 dark:bg-[#252731] border-r border-gray-200 dark:border-gray-700 z-50" id="sidebar">
+  <div class="fixed left-0 top-0 h-full w-64 bg-gray-50 dark:bg-[#252731] border-r border-gray-200 dark:border-gray-700 z-50 transition-all duration-300" id="sidebar">
     <!-- Logo Section -->
-    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex items-center space-x-3">
-        <span class="text-lg font-semibold text-black dark:text-white">Dashboard</span>
-      </div>
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <span class="text-lg font-semibold text-black dark:text-white">메뉴</span>
+      <button id="closeSidebar" class="text-black dark:text-white text-xl">&times;</button>
     </div>
 
     <!-- Navigation Menu -->
@@ -52,24 +51,70 @@
   <div class="ml-64 p-4 transition-all duration-300" id="mainContent">
     <header>
       <button class="toggle-btn text-xl mb-4 fixed top-4 left-4 z-40 md:hidden bg-white p-2 rounded shadow" id="toggleBtn">≣</button>
-      <h1>Welcome to My Dashboard</h1>
-      <p>사이드바 토글 및 모바일 최적화가 적용된 예시입니다.</p>
+      <h1 class="text-2xl font-bold mb-6">Welcome to My Dashboard</h1>
+      <!-- Example Cards Section -->
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold mb-2">거래량 상위</h2>
+          <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+            <li>가나다</li>
+            <li>파란나</li>
+            <li>최고점</li>
+          </ul>
+          <div class="flex justify-between items-center mt-4">
+            <a href="stock_list.html" class="text-blue-500 hover:underline">[더보기]</a>
+            <div class="text-gray-400">●○○</div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold mb-2">관심 종목</h2>
+          <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+            <li>배려도</li>
+            <li>지원상</li>
+            <li>단가로</li>
+          </ul>
+          <div class="flex justify-between items-center mt-4">
+            <a href="interest.html" class="text-blue-500 hover:underline">[더보기]</a>
+            <div class="text-gray-400">●○○</div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold mb-2">거래대금 상위</h2>
+          <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+            <li>헤어로</li>
+            <li>월샵</li>
+            <li>크로티</li>
+          </ul>
+          <div class="flex justify-between items-center mt-4">
+            <a href="transaction.html" class="text-blue-500 hover:underline">[더보기]</a>
+            <div class="text-gray-400">●○○</div>
+          </div>
+        </div>
+      </div>
     </header>
   </div>
 
   <script>
     const toggleBtn = document.getElementById("toggleBtn");
+    const closeBtn = document.getElementById("closeSidebar");
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.getElementById("mainContent");
 
     toggleBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("-left-64"); // Tailwind 방식으로 사이드바 숨김/보임
+      sidebar.classList.toggle("-left-64");
       sidebar.classList.toggle("collapsed");
-      if (sidebar.classList.contains("collapsed")) {
-        mainContent.classList.remove("ml-64");
-      } else {
-        mainContent.classList.add("ml-64");
-      }
+      mainContent.classList.toggle("ml-64");
+    });
+
+    closeBtn.addEventListener("click", () => {
+      sidebar.classList.add("-left-64");
+      sidebar.classList.add("collapsed");
+      mainContent.classList.remove("ml-64");
     });
   </script>
 </body>
