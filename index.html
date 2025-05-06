@@ -153,9 +153,7 @@
         card.innerHTML = `
           <h3>${stock.name} (${stock.code})</h3>
           <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
-          <a href="${stock.link}" target="_blank">
-            <img class="chart-img" src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/${item.code}.png" alt="${item.name} 차트"/>
-          </a>
+          <a href="${stock.link}" target="_blank">📈 차트 보기</a>
           ${newsHtml}
         `;
 
