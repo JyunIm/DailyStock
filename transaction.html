@@ -4,14 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>📈 오늘의 종목</title>
-    <link rel="stylesheet" href="/DailyStock/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-  
-    <header>💰 거래대금 상위</header>
-    <div class="stock-list" id="stockList"></div>
+  <body class="bg-white">
+      
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
+      <div class="p-4 flex justify-between items-center border-b">
+        <span class="font-semibold text-lg">메뉴</span>
+        <button id="closeSidebar" class="text-2xl">&times;</button>
+      </div>
+      <nav class="p-4 space-y-2">
+        <a href="index.html" class="block p-2 rounded hover:bg-gray-200">오늘의 종목</a>
+        <a href="stock_list.html" class="block p-2 rounded hover:bg-gray-200">거래량 상위 종목</a>
+        <a href="interest.html" class="block p-2 rounded hover:bg-gray-200">관심 종목</a>
+        <a href="transaction.html" class="block p-2 rounded hover:bg-gray-200">거래대금 상위 종목</a>
+      </nav>
+    </div>
+
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b shadow z-40 h-14 flex items-center px-4">
+      <button id="toggleBtn" class="text-2xl z-50">≣</button>
+      <h1 class="text-xl font-bold text-center absolute left-1/2 transform -translate-x-1/2">💰 거래대금 상위</h1>
+    </header>
+
+    <!-- 종목 카드 리스트 영역 -->
+    <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
    
     <script>
+      const toggleBtn = document.getElementById("toggleBtn");
+      const closeBtn = document.getElementById("closeSidebar");
+      const sidebar = document.getElementById("sidebar");
+  
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("-translate-x-full");
+      });
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+      });
+      
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "82799785";
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
@@ -45,10 +76,10 @@
   
         stocks.forEach(stock => {
           const card = document.createElement("div");
-          card.className = "stock-card";
+          card.className = "p-4 bg-white rounded shadow border";
           
           card.innerHTML = `
-            <h3>${stock.name} (${stock.code})</h3>
+            <h3><strong>${stock.name} (${stock.code})</strong></h3>
             <p>💵 거래대금: ${Number(stock.amount).toLocaleString()}</p>
             <p>📊 주가 변동: ${stock.change}</p>
             <p>🗂️ 종목 섹터: ${stock.sector}</p>
