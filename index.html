@@ -81,7 +81,7 @@
 </head>
 <body>
 
-  <header>📈 오늘의 거래량 상위 종목</header>
+  <header>📈 거래량 상위 종목</header>
   <div class="tabs" id="tabs"></div>
   <div class="stock-list" id="stockList"></div>
 
@@ -147,9 +147,15 @@
       stocks.forEach(stock => {
         const card = document.createElement("div");
         card.className = "stock-card";
-
-        const newsHtml = stock.news ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}</div>` : "";
-
+        
+        let formattedNews = (stock.news || "")
+          .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
+          .replace(/\n/g, "<br>"); // 줄바꿈
+    
+        const newsHtml = stock.news
+          ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${formattedNews}</div>`
+          : "";
+        
         card.innerHTML = `
           <h3>${stock.name} (${stock.code})</h3>
           <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
