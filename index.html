@@ -138,26 +138,26 @@
 
       if (dates.length > 0) renderStockList(dates[0]);
     }
-
+    
     function renderStockList(date) {
       const list = document.getElementById("stockList");
       list.innerHTML = "";
-
+    
       const stocks = stockDataByDate[date] || [];
-
+    
       stocks.forEach(stock => {
         const card = document.createElement("div");
         card.className = "stock-card";
-
-        const chartImg = `<iframe 
-                            src="https://m.stock.naver.com/item/chart/${stock.code}" 
-                            style="width: 100%; height: 300px; border: none; margin-top: 0.5rem;"
-                            loading="lazy"
-                          ></iframe>`;
+    
+        const chartImg = `<img 
+                            src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/mini_${stock.code}.png" 
+                            alt="차트 이미지" 
+                            style="width: 100%; max-width: 400px; margin-top: 0.5rem; border-radius: 8px;"
+                          />`;
         const newsHtml = stock.news
           ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}</div>`
           : "";
-
+    
         card.innerHTML = `
           <h3>${stock.name} (${stock.code})</h3>
           <p>📊 거래량: ${stock.volume.toLocaleString()}</p>
@@ -165,7 +165,7 @@
           ${chartImg}
           ${newsHtml}
         `;
-
+    
         list.appendChild(card);
       });
     }
