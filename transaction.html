@@ -9,7 +9,6 @@
   <body>
   
     <header>💰 거래대금 상위</header>
-    <div class="tabs" id="tabs"></div>
     <div class="stock-list" id="stockList"></div>
    
     <script>
@@ -23,6 +22,7 @@
         .then(rep => {
           const json = JSON.parse(rep.substring(47).slice(0, -2));
           const rows = json.table.rows;
+          const stocks = [];
 
           rows.slice(1).forEach(row => {
             const cells = row.c;
@@ -34,39 +34,15 @@
             const amount = cells[3]?.v || "N/A";
             const sector = (cells[4]?.v && cells[4].v !== "nan") ? cells[4].v : "-";
 
-            stockDataByDate["오늘"] = stockDataByDate["오늘"] || [];
-            stockDataByDate["오늘"].push({ code, name, change, amount, sector });
+            stocks.push({ code, name, change, amount, sector });
           });
   
-          renderTabs();
+          renderStockList(stocks);
         });
-      
-      function renderTabs() {
-        const tabs = document.getElementById("tabs");
-        tabs.innerHTML = "";
-  
-        const dates = Object.keys(stockDataByDate).sort().reverse();
-  
-        dates.forEach((date, index) => {
-          const tab = document.createElement("button");
-          tab.textContent = date;
-          tab.className = "tab" + (index === 0 ? " active" : "");
-          tab.onclick = () => {
-            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-            renderStockList(date);
-          };
-          tabs.appendChild(tab);
-        });
-  
-        if (dates.length > 0) renderStockList(dates[0]);
-      }
   
       function renderStockList(date) {
         const list = document.getElementById("stockList");
         list.innerHTML = "";
-  
-        const stocks = stockDataByDate[date] || [];
   
         stocks.forEach(stock => {
           const card = document.createElement("div");
