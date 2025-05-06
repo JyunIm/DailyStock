@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📈 오늘의 종목</title>
-  <script src="https://s3.tradingview.com/tv.js"></script>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,7 +35,6 @@
       border: none;
       background: none;
       font-weight: bold;
-      flex-shrink: 0;
     }
 
     .tab.active {
@@ -52,7 +50,7 @@
       background: white;
       border-radius: 12px;
       padding: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
@@ -60,8 +58,11 @@
       margin: 0 0 0.5rem;
     }
 
-    .chart-container {
-      margin-top: 1rem;
+    .stock-card img {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      margin-top: 0.5rem;
     }
 
     .news {
@@ -73,8 +74,8 @@
     }
 
     @media (max-width: 600px) {
-      .tabs {
-        font-size: 0.85rem;
+      .stock-card img {
+        width: 100%;
       }
     }
   </style>
@@ -90,30 +91,30 @@
     const gid = "1489164103";
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
     const stockDataByDate = {};
-
+    
     fetch(url)
       .then(res => res.text())
       .then(rep => {
         const json = JSON.parse(rep.substring(47).slice(0, -2));
         const rows = json.table.rows;
-
+    
         rows.forEach(row => {
           const cells = row.c;
           if (!cells || cells.length < 5) return;
-
+    
           const date = cells[0]?.v;
           const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
           const name = cells[2]?.v || "종목명 없음";
           const volume = cells[3]?.v || "N/A";
           const link = cells[4]?.v || "#";
           const news = cells[5]?.v || "";
-
+    
           if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
-
+    
           if (!stockDataByDate[date]) stockDataByDate[date] = [];
           stockDataByDate[date].push({ code, name, volume, link, news });
         });
-
+    
         renderTabs();
       });
 
@@ -148,36 +149,26 @@
         const card = document.createElement("div");
         card.className = "stock-card";
 
-        const chartId = `tv_chart_${stock.code}`;
-        const newsHtml = stock.news ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}</div>` : "";
+        const chartImg = `<iframe 
+                            src="https://m.stock.naver.com/item/chart/${stock.code}" 
+                            style="width: 100%; height: 300px; border: none; margin-top: 0.5rem;"
+                            loading="lazy"
+                          ></iframe>`;
+        const newsHtml = stock.news
+          ? `<div class="news"><strong>📰 관련 뉴스:</strong><br>${stock.news.replace(/\n/g, "<br>")}</div>`
+          : "";
 
         card.innerHTML = `
           <h3>${stock.name} (${stock.code})</h3>
-          <p>📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
+          <p>📊 거래량: ${stock.volume.toLocaleString()}</p>
           <a href="${stock.link}" target="_blank">📈 차트 바로가기</a>
-          <div id="${chartId}" class="chart-container"></div>
+          ${chartImg}
           ${newsHtml}
         `;
 
         list.appendChild(card);
-
-        // 차트 동적 생성
-        new TradingView.MediumWidget({
-          "container_id": chartId,
-          "symbol": "KRX:" + stock.code,
-          "interval": "D",
-          "width": "100%",
-          "height": 300,
-          "theme": "light",
-          "style": "1",
-          "locale": "ko",
-          "toolbar_bg": "#f1f3f6",
-          "enable_publishing": false,
-          "allow_symbol_change": false
-        });
       });
     }
   </script>
-
 </body>
 </html>
