@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📌 관심종목</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+
+    .watchlist {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stock-item {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1rem;
+    }
+
+    .stock-item:last-child {
+      border-bottom: none;
+    }
+
+    a.back {
+      display: inline-block;
+      margin-top: 2rem;
+      text-decoration: none;
+      color: #007acc;
+      font-weight: bold;
+    }
+
+    a.finance-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      color: #007acc;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>📌 관심종목</header>
+
+  <div class="watchlist" id="watchlist">
+    <p>로딩 중...</p>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="index.html" class="back">← 메인 페이지로</a>
+  </div>
+
+  <script>
+    const sheetId = "YOUR_SHEET_ID_HERE";
+    const gid = "YOUR_GID_HERE";
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        const json = JSON.parse(data.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const watchlistDiv = document.getElementById("watchlist");
+        watchlistDiv.innerHTML = "";
+
+        rows.forEach(row => {
+          const code = row.c[0]?.v?.toString().padStart(6, "0");
+          const name = row.c[1]?.v;
+          const memo = row.c[2]?.v || "";
+
+          if (code && name) {
+            const stockItem = document.createElement("div");
+            stockItem.className = "stock-item";
+            stockItem.innerHTML = `
+              <h3>${name} (${code})</h3>
+              <p>${memo}</p>
+              <a href="https://finance.naver.com/item/main.naver?code=${code}" target="_blank" class="finance-link">📈 네이버 금융에서 보기</a>
+            `;
+            watchlistDiv.appendChild(stockItem);
+          }
+        });
+      });
+  </script>
+
+</body>
+</html>
