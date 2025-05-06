@@ -3,100 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📌 관심종목</title>
-  <style>
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f7f7f7;
-      margin: 0;
-      padding: 1.5rem;
-    }
-
-    header {
-      text-align: center;
-      font-size: 1.8rem;
-      font-weight: bold;
-      margin-bottom: 2rem;
-    }
-
-    .watchlist {
-      max-width: 600px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .stock-item {
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 1rem;
-    }
-
-    .stock-item:last-child {
-      border-bottom: none;
-    }
-
-    a.back {
-      display: inline-block;
-      margin-top: 2rem;
-      text-decoration: none;
-      color: #007acc;
-      font-weight: bold;
-    }
-
-    a.finance-link {
-      display: inline-block;
-      margin-top: 0.5rem;
-      color: #007acc;
-      text-decoration: none;
-    }
-  </style>
+  <title>📈 오늘의 종목</title>
+  <link rel="stylesheet" href="/DailyStock/style.css" />
 </head>
 <body>
 
   <header>📌 관심종목</header>
-
-  <div class="watchlist" id="watchlist">
-    <p>로딩 중...</p>
-  </div>
-
-  <div style="text-align: center;">
-    <a href="index.html" class="back">← 메인 페이지로</a>
-  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="stock-list" id="stockList"></div>
 
   <script>
-    const sheetId = "YOUR_SHEET_ID_HERE";
-    const gid = "YOUR_GID_HERE";
+    const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+    const gid = "2060091062";
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+    const stockDataByDate = {};
 
     fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const json = JSON.parse(data.substr(47).slice(0, -2));
+      .then(res => res.text())
+      .then(rep => {
+        const json = JSON.parse(rep.substring(47).slice(0, -2));
         const rows = json.table.rows;
 
-        const watchlistDiv = document.getElementById("watchlist");
-        watchlistDiv.innerHTML = "";
-
         rows.forEach(row => {
-          const code = row.c[0]?.v?.toString().padStart(6, "0");
-          const name = row.c[1]?.v;
-          const memo = row.c[2]?.v || "";
+          const cells = row.c;
+          if (!cells || cells.length < 5) return;
 
-          if (code && name) {
-            const stockItem = document.createElement("div");
-            stockItem.className = "stock-item";
-            stockItem.innerHTML = `
-              <h3>${name} (${code})</h3>
-              <p>${memo}</p>
-              <a href="https://finance.naver.com/item/main.naver?code=${code}" target="_blank" class="finance-link">📈 네이버 금융에서 보기</a>
-            `;
-            watchlistDiv.appendChild(stockItem);
-          }
+          const date = cells[0]?.v;
+          const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
+          const name = cells[2]?.v || "종목명 없음";
+          const link = cells[3]?.v || "#";
+          const grade = cells[4]?.v || "";
+
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    
+          if (!stockDataByDate[date]) stockDataByDate[date] = [];
+          stockDataByDate[date].push({ code, name, volume, link, grade });
         });
+
+        renderTabs();
       });
+    
+    function renderTabs() {
+      const tabs = document.getElementById("tabs");
+      tabs.innerHTML = "";
+
+      const dates = Object.keys(stockDataByDate).sort().reverse();
+
+      dates.forEach((date, index) => {
+        const tab = document.createElement("button");
+        tab.textContent = date;
+        tab.className = "tab" + (index === 0 ? " active" : "");
+        tab.onclick = () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          renderStockList(date);
+        };
+        tabs.appendChild(tab);
+      });
+
+      if (dates.length > 0) renderStockList(dates[0]);
+    }
+
+    function renderStockList(date) {
+      const list = document.getElementById("stockList");
+      list.innerHTML = "";
+
+      const stocks = stockDataByDate[date] || [];
+
+      stocks.forEach(stock => {
+        const card = document.createElement("div");
+        card.className = "stock-card";
+
+        let formattedNews = (stock.news || "")
+          .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>') // URL 자동 링크
+          .replace(/\n/g, "<br>"); // 줄바꿈
+        
+        card.innerHTML = `
+          <h3>${stock.name} (${stock.code})</h3>
+          <p>📈 종목 등급: <strong>${stock.grade}</strong></p>
+          <a href="${stock.link}" target="_blank">📊 차트 보기</a>
+        `;
+
+        list.appendChild(card);
+      });
+    }
+
   </script>
 
 </body>
