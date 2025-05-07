@@ -60,18 +60,19 @@
   
           rows.forEach(row => {
             const cells = row.c;
-            if (!cells || cells.length < 4) return;
+            if (!cells || cells.length < 5) return;
   
             const date = cells[0]?.v;
             const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
             const name = cells[2]?.v || "종목명 없음";
             const link = cells[3]?.v || "#";
             const grade = cells[4]?.v || "";
+            const news = cells[5]?.v || "";
   
             if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
       
             if (!stockDataByDate[date]) stockDataByDate[date] = [];
-            stockDataByDate[date].push({ code, name, link, grade });
+            stockDataByDate[date].push({ code, name, link, grade, news });
           });
   
           renderTabs();
@@ -118,10 +119,15 @@
             .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 break-all">$1</a>')
             .replace(/\n/g, "<br>"); // 줄바꿈
           
+          const newsHtml = stock.news
+            ? `<div class="mt-2 text-sm text-gray-700">📰 관련 뉴스:<br>${formattedNews}</div>`
+            : "";
+          
           card.innerHTML = `
             <h3><strong>${stock.name} (${stock.code})</strong></h3>
             <p>📈 종목 등급: ${stock.grade}</p>
             <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📊 차트 보기</a>
+            ${newsHtml}
           `;
   
           list.appendChild(card);
