@@ -51,41 +51,40 @@
       const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
       const gid = "556309223";
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-      const newsKeyword = {};
-  
+      const newsKeyword = {}; // { keyword: [{ name, news }] }
+      
       fetch(url)
         .then(res => res.text())
         .then(rep => {
           const json = JSON.parse(rep.substring(47).slice(0, -2));
           const rows = json.table.rows;
-  
+      
           rows.forEach(row => {
             const cells = row.c;
-            if (!cells || cells.length < 5) return;
-  
-            const date = cells[0]?.v;
+            if (!cells || cells.length < 4) return;
+      
             const keyword = cells[1]?.v;
             const name = cells[2]?.v || "종목명 없음";
             const news = cells[3]?.v || "";
-  
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      
+            if (!keyword) return;
       
             if (!newsKeyword[keyword]) newsKeyword[keyword] = [];
             newsKeyword[keyword].push({ name, news });
           });
-  
+      
           renderTabs();
         });
       
       function renderTabs() {
         const tabs = document.getElementById("tabs");
         tabs.innerHTML = "";
-  
+      
         const keywords = Object.keys(newsKeyword).sort();
-  
-        dates.forEach((date, index) => {
+      
+        keywords.forEach((keyword, index) => {
           const tab = document.createElement("button");
-          tab.textContent = date;
+          tab.textContent = keyword;
           tab.className = `tab px-4 py-2 rounded-full border transition-all ${
             index === 0 ? "bg-black text-white" : "bg-white text-black"
           }`;
@@ -96,41 +95,42 @@
             });
             tab.classList.remove("bg-white", "text-black");
             tab.classList.add("bg-black", "text-white");
-            renderStockList(date);
+            renderStockList(keyword);
           };
           tabs.appendChild(tab);
         });
-  
-        if (dates.length > 0) renderStockList(dates[0]);
+      
+        if (keywords.length > 0) renderStockList(keywords[0]);
       }
-  
-      function renderStockList(date) {
+      
+      function renderStockList(keyword) {
         const list = document.getElementById("stockList");
         list.innerHTML = "";
-  
+      
         const stocks = newsKeyword[keyword] || [];
-  
+      
         stocks.forEach((stock, index) => {
           const card = document.createElement("div");
           card.className = "p-4 bg-white rounded shadow border";
-  
+      
           let formattedNews = (stock.news || "")
             .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 break-all">$1</a>')
-            .replace(/\n/g, "<br>"); // 줄바꿈
-          
+            .replace(/\n/g, "<br>");
+      
           const newsHtml = stock.news
             ? `<div class="mt-2 text-sm text-gray-700">📰 관련 뉴스:<br>${formattedNews}</div>`
             : "";
-          
+      
           card.innerHTML = `
             <h3><strong>${stock.name}</strong></h3>
             ${newsHtml}
             <div class="mt-4 text-center text-sm text-gray-400">- ${index + 1} -</div>
           `;
-  
+      
           list.appendChild(card);
         });
       }
+
   
     </script>
   
