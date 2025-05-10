@@ -106,8 +106,8 @@
                 rows.slice(1).forEach(row => {
                   const cells = row.c;
                   const code = cells[1]?.v || "";
-                  const open = cells[2]?.v;
-                  const close = cells[3]?.v;
+                  const openRaw = cells[2]?.v;
+                  const closeRaw = cells[3]?.v;
                   const rate = cells[4]?.v || "";
 
                   const open = !isNaN(Number(openRaw)) ? Number(openRaw).toLocaleString() : openRaw || "";
