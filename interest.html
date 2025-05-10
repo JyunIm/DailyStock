@@ -112,7 +112,7 @@
   
         const stocks = stockDataByDate[date] || [];
   
-        stocks.forEach(stock => {
+        stocks.forEach((stock, index) => {
           const card = document.createElement("div");
           card.className = "p-4 bg-white rounded shadow border";
   
@@ -129,6 +129,7 @@
             <p>📈 종목 등급: ${stock.grade}</p>
             <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📊 차트 보기</a>
             ${newsHtml}
+            <div class="mt-4 text-center text-sm text-gray-400">- ${index + 1} -</div>
           `;
   
           list.appendChild(card);
