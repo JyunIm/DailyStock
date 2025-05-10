@@ -76,55 +76,41 @@
             const sheetIdIndex = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
             const gidIndex = "802896569";
             const urlIndex = `https://docs.google.com/spreadsheets/d/${sheetIdIndex}/gviz/tq?tqx=out:json&gid=${gidIndex}`;
-        
+          
             fetch(urlIndex)
               .then(res => res.text())
               .then(rep => {
                 const json = JSON.parse(rep.substring(47).slice(0, -2));
                 const rows = json.table.rows;
                 const list = document.getElementById("index-list");
-
-                // 테이블 생성
-                const table = document.createElement("table");
-                table.className = "min-w-full text-sm border border-gray-300";
-
-                // 테이블 헤더
-                table.innerHTML = `
-                  <thead class="bg-gray-100">
-                    <tr>
-                      <th class="border px-2 py-1">지수명</th>
-                      <th class="border px-2 py-1">시가</th>
-                      <th class="border px-2 py-1">종가</th>
-                      <th class="border px-2 py-1">변동률</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                `;
-
-                const tbody = table.querySelector("tbody");
-                
+                list.innerHTML = "";
+          
                 rows.slice(1).forEach(row => {
                   const cells = row.c;
+                  const date = cells[0]?.v || "";
                   const code = cells[1]?.v || "";
                   const openRaw = cells[2]?.v;
                   const closeRaw = cells[3]?.v;
-                  const rate = cells[4]?.v || "";
-
-                  const open = !isNaN(Number(openRaw)) ? Number(openRaw).toLocaleString() : openRaw || "";
-                  const close = !isNaN(Number(closeRaw)) ? Number(closeRaw).toLocaleString() : closeRaw || "";
-                  
-                  const tr = document.createElement("tr");
-                  tr.innerHTML = `
-                    <td class="border px-2 py-1 whitespace-normal">${code}</td>
-                    <td class="border px-2 py-1">${open}</td>
-                    <td class="border px-2 py-1">${close}</td>
-                    <td class="border px-2 py-1">${rate}</td>
-                  `;
-                  tbody.appendChild(tr);
-                });
+                  const rateRaw = cells[4]?.v || "";
           
-                list.innerHTML = ""; // 기존 ul 제거
-                list.appendChild(table);
+                  const close = !isNaN(closeRaw) ? Number(closeRaw).toLocaleString() : closeRaw;
+          
+                  const card = document.createElement("div");
+                  card.className = "flex items-center justify-between py-3 border-b";
+          
+                  card.innerHTML = `
+                    <div>
+                      <div class="font-semibold text-base">${code}</div>
+                      <div class="text-xs text-gray-500 mt-0.5">⏱️ ${date}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-semibold">${close}</div>
+                      <div class="text-xs">${rateRaw}</div>
+                    </div>
+                  `;
+          
+                  list.appendChild(card);
+                });
               })
               .catch(err => {
                 console.error("지표 데이터 로드 실패:", err);
