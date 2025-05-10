@@ -106,12 +106,12 @@
                 rows.slice(1).forEach(row => {
                   const cells = row.c;
                   const code = cells[1]?.v || "";
-                  const open = cells[2]?.v || "";
-                  const close = cells[3]?.v || "";
+                  const open = cells[2]?.v;
+                  const close = cells[3]?.v;
                   const rate = cells[4]?.v || "";
 
-                  const open = typeof openRaw === "number" ? openRaw.toLocaleString() : openRaw || "";
-                  const close = typeof closeRaw === "number" ? closeRaw.toLocaleString() : closeRaw || "";
+                  const open = !isNaN(Number(openRaw)) ? Number(openRaw).toLocaleString() : openRaw || "";
+                  const close = !isNaN(Number(closeRaw)) ? Number(closeRaw).toLocaleString() : closeRaw || "";
                   
                   const tr = document.createElement("tr");
                   tr.innerHTML = `
