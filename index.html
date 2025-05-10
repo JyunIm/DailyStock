@@ -40,7 +40,7 @@
           <script>
             const sheetIdNews = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
             const gidNews = "460717355";
-            const urlNews = `https://docs.google.com/spreadsheets/d/${sheetIdNews}/gviz/tq?tqx=out:json&gid=${gidNews}`;
+            const urlNews = https://docs.google.com/spreadsheets/d/${sheetIdNews}/gviz/tq?tqx=out:json&gid=${gidNews};
         
             fetch(urlNews)
               .then(res => res.text())
@@ -48,7 +48,6 @@
                 const json = JSON.parse(rep.substring(47).slice(0, -2));
                 const rows = json.table.rows;
                 const list = document.getElementById("news-list");
-                list.innerHTML = "";
         
                 rows.slice(1).forEach(row => {
                   const cells = row.c;
@@ -56,18 +55,16 @@
                   const link = cells[1]?.v || "#"
                   const paper = cells[2]?.v || "언론사 없음";
         
-                  const newsItem = document.createElement("div");
-                  newsItem.className = "py-2 border-b border-gray-200";
-          
-                  newsItem.innerHTML = `
-                    <div class="text-sm">📰 ${title}</div>
-                    <div class="text-xs mt-1">
-                      <a href="${link}" target="_blank" class="text-blue-600 underline">뉴스 보기</a> (${paper})
-                    </div>
-                  `;
-                  list.appendChild(newsItem);
+                  const li = document.createElement("li");
+                  li.innerHTML = 📰 ${title} <a href="${link}" target="_blank" class="text-blue-600 underline">뉴스 보기</a> (${paper})<br>;
+                  list.appendChild(li);
+                });
+              })
+              .catch(err => {
+                console.error("뉴스 데이터 로드 실패:", err);
               });
           </script>
+          
         </div>
         
         <!-- 인덱스 지표 -->
