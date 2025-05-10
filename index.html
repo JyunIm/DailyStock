@@ -85,7 +85,7 @@
                 const list = document.getElementById("index-list");
                 list.innerHTML = "";
           
-                rows.slice(1).forEach(row => {
+                rows.forEach(row => {
                   const cells = row.c;
                   const date = cells[0]?.v || "";
                   const code = cells[1]?.v || "";
