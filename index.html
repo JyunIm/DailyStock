@@ -49,13 +49,14 @@
                 const rows = json.table.rows;
                 const list = document.getElementById("news-list");
         
-                rows.forEach(row => {
+                rows.slice(1).forEach(row => {
                   const cells = row.c;
                   const title = cells[0]?.v || "제목 없음";
+                  const link = cells[1]?.v || "#"
                   const paper = cells[2]?.v || "언론사 없음";
         
                   const li = document.createElement("li");
-                  li.textContent = `📰 ${title} (${paper})`;
+                  li.innerHTML = `📰 <a href="${link}" target="_blank" class="text-blue-600 underline">${title}</a> (${paper})`;
                   list.appendChild(li);
                 });
               })
@@ -89,7 +90,14 @@
                   const rate = cells[4]?.v || "";
         
                   const li = document.createElement("li");
-                  li.innerHTML = `<strong>${code}</strong>: 시가 ${open} → 종가 ${close} (${rate}%)`;
+                  li.innerHTML = `
+                    <div class = "mb-2">
+                    <strong>${code}</strong><br>
+                     - 시가 ${open}<br>
+                     - 종가 ${close}<br>
+                     - 변동률 ${rate}
+                     </div>
+                    `;
                   list.appendChild(li);
                 });
               })
