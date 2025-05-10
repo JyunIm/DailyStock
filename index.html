@@ -84,11 +84,9 @@
                 const rows = json.table.rows;
                 const list = document.getElementById("index-list");
 
-
                 // 테이블 생성
                 const table = document.createElement("table");
                 table.className = "min-w-full text-sm border border-gray-300";
-
 
                 // 테이블 헤더
                 table.innerHTML = `
@@ -111,7 +109,10 @@
                   const open = cells[2]?.v || "";
                   const close = cells[3]?.v || "";
                   const rate = cells[4]?.v || "";
-        
+
+                  const open = typeof openRaw === "number" ? openRaw.toLocaleString() : openRaw || "";
+                  const close = typeof closeRaw === "number" ? closeRaw.toLocaleString() : closeRaw || "";
+                  
                   const tr = document.createElement("tr");
                   tr.innerHTML = `
                     <td class="border px-2 py-1 whitespace-normal">${code}</td>
