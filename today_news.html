@@ -110,7 +110,7 @@
   
         const stocks = newsKeyword[keyword] || [];
   
-        stocks.forEach(stock => {
+        stocks.forEach((stock, index) => {
           const card = document.createElement("div");
           card.className = "p-4 bg-white rounded shadow border";
   
@@ -125,6 +125,7 @@
           card.innerHTML = `
             <h3><strong>${stock.name}</strong></h3>
             ${newsHtml}
+            <div class="mt-4 text-center text-sm text-gray-400">- ${index + 1} -</div>
           `;
   
           list.appendChild(card);
