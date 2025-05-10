@@ -37,63 +37,66 @@
         <div class="bg-white p-4 rounded shadow relative">
           <h2 class="text-lg font-semibold mb-2">사람들이 많이 읽은 뉴스</h2>
           <ul id="news-list" class="text-sm text-gray-700 space-y-1"></ul>
-            <!-- Scripts -->
-            <script>
-              const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
-              const gid = "460717355";
-              const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-              const news = [];
-              fetch(url)
-                .then(res => res.text())
-                .then(rep => {
-                  const json = JSON.parse(rep.substring(47).slice(0, -2));
-                  const rows = json.table.rows;
-                  
-                  rows.forEach(row => {
-                    const cells = row.c;
-
-                    const news_title = cells[0]?.v;
-                    const newspaper = cells[2]?.v;
-                    
-                    news.push({ news_title, newspaper });
-                  });
-                } catch (err) {
-                  console.error("데이터 로드 실패:", err);
-                }
-            </script>
+          <script>
+            const sheetIdNews = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+            const gidNews = "460717355";
+            const urlNews = `https://docs.google.com/spreadsheets/d/${sheetIdNews}/gviz/tq?tqx=out:json&gid=${gidNews}`;
+        
+            fetch(urlNews)
+              .then(res => res.text())
+              .then(rep => {
+                const json = JSON.parse(rep.substring(47).slice(0, -2));
+                const rows = json.table.rows;
+                const list = document.getElementById("news-list");
+        
+                rows.forEach(row => {
+                  const cells = row.c;
+                  const title = cells[0]?.v || "제목 없음";
+                  const paper = cells[2]?.v || "언론사 없음";
+        
+                  const li = document.createElement("li");
+                  li.textContent = `📰 ${title} (${paper})`;
+                  list.appendChild(li);
+                });
+              })
+              .catch(err => {
+                console.error("뉴스 데이터 로드 실패:", err);
+              });
+          </script>
         </div>
-  
+        
         <!-- 인덱스 지표 -->
         <div class="bg-white p-4 rounded shadow relative">
           <h2 class="text-lg font-semibold mb-2">인덱스 지표</h2>
           <ul id="index-list" class="text-sm text-gray-700 space-y-1"></ul>
-            <!-- Scripts -->
-            <script>
-              const sheetId = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
-              const gid = "802896569";
-              const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-              const index = [];
-              fetch(url)
-                .then(res => res.text())
-                .then(rep => {
-                  const json = JSON.parse(rep.substring(47).slice(0, -2));
-                  const rows = json.table.rows;
-                  
-                  rows.forEach(row => {
-                    const cells = row.c;
-
-                    const date = cells[0]?.v;
-                    const code = cells[1]?.v;
-                    const open = cells[2]?.v;
-                    const close = cells[3]?.v;
-                    const rate = cells[4]?.v;
-                    
-                    index.push({ date, code, open, close, rate });
-                  });
-                } catch (err) {
-                  console.error("데이터 로드 실패:", err);
-                }
-            </script>
+          <script>
+            const sheetIdIndex = "1VoPUB-q7jmz3Z8NPjsCxV8oERLPCSQD3HUCLo0gpf40";
+            const gidIndex = "802896569";
+            const urlIndex = `https://docs.google.com/spreadsheets/d/${sheetIdIndex}/gviz/tq?tqx=out:json&gid=${gidIndex}`;
+        
+            fetch(urlIndex)
+              .then(res => res.text())
+              .then(rep => {
+                const json = JSON.parse(rep.substring(47).slice(0, -2));
+                const rows = json.table.rows;
+                const list = document.getElementById("index-list");
+        
+                rows.forEach(row => {
+                  const cells = row.c;
+                  const code = cells[1]?.v || "";
+                  const open = cells[2]?.v || "";
+                  const close = cells[3]?.v || "";
+                  const rate = cells[4]?.v || "";
+        
+                  const li = document.createElement("li");
+                  li.innerHTML = `<strong>${code}</strong>: 시가 ${open} → 종가 ${close} (${rate}%)`;
+                  list.appendChild(li);
+                });
+              })
+              .catch(err => {
+                console.error("지표 데이터 로드 실패:", err);
+              });
+          </script>
         </div>
       </div>
     </div>
