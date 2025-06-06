@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-white">
-    
     <!-- Sidebar -->
     <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-100 border-r z-50 transform -translate-x-full transition-transform">
       <div class="p-4 flex justify-between items-center border-b">
@@ -35,12 +34,12 @@
     
     <!-- 종목 카드 리스트 영역 -->
     <div id="stockList" class="grid grid-cols-1 gap-4 p-4"></div>
-    
+  
     <script>
       const toggleBtn = document.getElementById("toggleBtn");
       const closeBtn = document.getElementById("closeSidebar");
       const sidebar = document.getElementById("sidebar");
-  
+
       toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("-translate-x-full");
       });
@@ -52,39 +51,45 @@
       const gid = "2060091062";
       const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
       const stockDataByDate = {};
-  
+
       fetch(url)
         .then(res => res.text())
         .then(rep => {
           const json = JSON.parse(rep.substring(47).slice(0, -2));
           const rows = json.table.rows;
-  
+
           rows.forEach(row => {
             const cells = row.c;
-            if (!cells || cells.length < 5) return;
-  
-            const date = cells[0]?.v;
+            if (!cells || cells.length < 6) return;
+
+            let rawDate = cells[0]?.v;
             const code = cells[1]?.v?.toString().padStart(6, "0") || "000000";
             const name = cells[2]?.v || "종목명 없음";
-            const volume = cells[3]?.v || "N/A";
-            const link = cells[4]?.v || "#";
+            const link = cells[3]?.v || "#";
+            const grade = cells[4]?.v || "";
             const news = cells[5]?.v || "";
-  
+
+            // 날짜 형식 정리: "2025-05-08 00:00:00" → "2025-05-08"
+            const dateObj = new Date(rawDate);
+            const date = isNaN(dateObj)
+              ? rawDate.split(" ")[0]  // fallback
+              : dateObj.toISOString().slice(0, 10);
+
             if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
-  
+
             if (!stockDataByDate[date]) stockDataByDate[date] = [];
-            stockDataByDate[date].push({ code, name, volume, link, news });
+            stockDataByDate[date].push({ code, name, link, grade, news });
           });
-  
+
           renderTabs();
         });
-  
+
       function renderTabs() {
         const tabs = document.getElementById("tabs");
         tabs.innerHTML = "";
-  
+
         const dates = Object.keys(stockDataByDate).sort().reverse();
-  
+
         dates.forEach((date, index) => {
           const tab = document.createElement("button");
           tab.textContent = date;
@@ -102,42 +107,40 @@
           };
           tabs.appendChild(tab);
         });
-  
+
         if (dates.length > 0) renderStockList(dates[0]);
       }
-  
+
       function renderStockList(date) {
         const list = document.getElementById("stockList");
         list.innerHTML = "";
-  
+
         const stocks = stockDataByDate[date] || [];
-  
+
         stocks.forEach((stock, index) => {
           const card = document.createElement("div");
           card.className = "p-4 bg-white rounded shadow border";
-          
-          let formattedNews = (stock.news || "")
+
+          // 뉴스 HTML 변환
+          const formattedNews = (stock.news || "")
             .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 break-all">$1</a>')
-            .replace(/\n/g, "<br>"); // 줄바꿈
-      
+            .replace(/\n/g, "<br>");
+
           const newsHtml = stock.news
             ? `<div class="mt-2 text-sm text-gray-700">📰 관련 뉴스:<br>${formattedNews}</div>`
             : "";
 
           card.innerHTML = `
             <h3><strong>${stock.name} (${stock.code})</strong></h3>
-            <p class="text-gray-700">📊 거래량: ${Number(stock.volume).toLocaleString()}</p>
-            <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📈 차트 보기</a>
+            <p>📈 종목 등급: ${stock.grade}</p>
+            <a href="${stock.link}" target="_blank" class="text-blue-600 break-all">📊 차트 보기</a>
             ${newsHtml}
             <div class="mt-4 text-center text-sm text-gray-400">- ${index + 1} -</div>
           `;
 
-  
           list.appendChild(card);
-  
         });
       }
     </script>
-  
   </body>
 </html>
